@@ -131,6 +131,7 @@ python BGIScriptRepackerV2.py ./source/_12_ichiB ./gbk/_12_ichiB_tc.txt ./temp/_
 python BGIScriptRepackerV2.py ./source/_12_yukoB ./gbk/_12_yukoB_tc.txt ./temp/_12_yukoB
 python BGIScriptRepackerV2.py ./source/_13 ./gbk/_13_tc.txt ./temp/_13
 python BGIScriptRepackerV2.py ./source/_14 ./gbk/_14_tc.txt ./temp/_14
+python BGIScriptInserter_Lib.py ./source/Custom ./gbk/Custom_tc.txt ./temp/Custom
 
 python BGIScriptRepacker-jp.py ./temp/3p_x01 ./jp/jpname/3p_x01.txt ./outputgbk/3p_x01
 python BGIScriptRepacker-jp.py ./temp/aiko_00 ./jp/jpname/aiko_00.txt ./outputgbk/aiko_00
@@ -262,6 +263,7 @@ python BGIScriptRepacker-jp.py ./temp/_14 ./jp/jpname/_14.txt ./outputgbk/_14
 
 copy /y .\temp\macro_story .\outputgbk\
 copy /y .\temp\MakerLogo .\outputgbk\
+copy /y .\temp\Custom .\outputgbk\
 
 
 
