@@ -1,6 +1,8 @@
+chcp 65001 >nul
 python -m pip install opencc-python-reimplemented
 mkdir outputgbk
 mkdir temp
+python 繁體中文轉簡體中文.py
 
 python BGIScriptRepackerV2.py ./source/3p_x01 ./gbk/3p_x01_tc.txt ./temp/3p_x01
 python BGIScriptRepackerV2.py ./source/aiko_00 ./gbk/aiko_00_tc.txt ./temp/aiko_00
