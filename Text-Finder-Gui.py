@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-文字尋找器 GUI v1.0 - 全目錄搜尋
+文字尋找器 GUI v1.1 - 全目錄搜尋
 支援: 自動編碼辨識(UTF8/BIG5/GBK/UTF16)、正則表達式、大小寫、子目錄、預覽、匯出
+更新: 關鍵字/路徑/副檔名輸入框支援右鍵複製貼上 + Ctrl+A 全選
 """
 import os
 import re
@@ -43,10 +44,10 @@ def read_text_smart(path: Path):
     return text.splitlines(), 'utf-8(replace)'
 
 HELP_TEXT = """
-【文字尋找器 v1.0 使用說明】
+【文字尋找器 v1.1 使用說明】
 
 1. 選擇資料夾：點「瀏覽」選擇要搜尋的目錄
-2. 輸入關鍵字：要找的文字，支援中文
+2. 輸入關鍵字：要找的文字，支援中文（可右鍵複製貼上 / Ctrl+V）
 3. 設定選項：
    • 區分大小寫：勾選後 A≠a
    • 正則表達式：可用 Regex，如 \\d+ 找數字、error.*timeout
@@ -67,12 +68,13 @@ HELP_TEXT = """
   ^\\s*def\\s+        找 Python函數定義
 
 提示：大量檔案時建議先用副檔名過濾加快速度
+關鍵字欄位支援：右鍵 → 剪下/複製/貼上/全選，以及 Ctrl+A / Ctrl+C / Ctrl+V / Ctrl+X
 """
 
 class TextFinderApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("文字尋找器 GUI - 全目錄搜尋 v1.0")
+        self.title("文字尋找器 GUI - 全目錄搜尋 v1.1")
         self.geometry("980x700")
         
         # 狀態
@@ -81,6 +83,23 @@ class TextFinderApp(tk.Tk):
         self.files_scanned = 0
         
         self._build_ui()
+
+    def _add_clipboard_menu(self, entry):
+        """為 Entry 加入右鍵複製貼上選單，並支援 Ctrl+A 全選"""
+        menu = tk.Menu(self, tearoff=0)
+        menu.add_command(label="剪下", command=lambda: entry.event_generate("<<Cut>>"))
+        menu.add_command(label="複製", command=lambda: entry.event_generate("<<Copy>>"))
+        menu.add_command(label="貼上", command=lambda: entry.event_generate("<<Paste>>"))
+        menu.add_separator()
+        menu.add_command(label="全選", command=lambda: entry.select_range(0, tk.END))
+
+        def show_menu(event):
+            menu.tk_popup(event.x_root, event.y_root)
+
+        entry.bind("<Button-3>", show_menu)
+        # 確保 Ctrl+A 全選（部分平台預設沒有）
+        entry.bind("<Control-a>", lambda e: (entry.select_range(0, tk.END), "break"))
+        entry.bind("<Control-A>", lambda e: (entry.select_range(0, tk.END), "break"))
 
     def _build_ui(self):
         # === 頂部路徑區 ===
@@ -91,6 +110,7 @@ class TextFinderApp(tk.Tk):
         self.path_var = tk.StringVar(value=str(Path.home()))
         self.path_entry = ttk.Entry(top, textvariable=self.path_var, width=55)
         self.path_entry.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
+        self._add_clipboard_menu(self.path_entry)
         ttk.Button(top, text="瀏覽...", command=self.browse).pack(side=tk.LEFT, padx=2)
         ttk.Button(top, text="HELP", command=self.show_help).pack(side=tk.LEFT, padx=5)
 
@@ -106,6 +126,7 @@ class TextFinderApp(tk.Tk):
         self.keyword_entry = ttk.Entry(row1, textvariable=self.keyword_var, width=50, font=("", 11))
         self.keyword_entry.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
         self.keyword_entry.bind('<Return>', lambda e: self.start_search())
+        self._add_clipboard_menu(self.keyword_entry)  # ← 關鍵字支援複製貼上
         ttk.Button(row1, text="開始搜尋", command=self.start_search).pack(side=tk.LEFT, padx=5)
         ttk.Button(row1, text="停止", command=self.stop_search).pack(side=tk.LEFT)
 
@@ -126,6 +147,7 @@ class TextFinderApp(tk.Tk):
         self.ext_var = tk.StringVar(value="txt, log, srt, csv, md, py, json, xml, html, ini, conf")
         self.ext_entry = ttk.Entry(row2, textvariable=self.ext_var, width=35)
         self.ext_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        self._add_clipboard_menu(self.ext_entry)
 
         # === 結果區 ===
         result_frame = ttk.Frame(self, padding=(10,5))
